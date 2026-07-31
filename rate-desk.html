@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Rate Desk — private study platform</title>
+<style>
+:root{
+  --ground:#141B2D; --panel:#1A2233; --panel-2:#212C40; --rule:#2E3B54;
+  --ink:#E6EAF2; --muted:#8A97B0; --brass:#C9A227; --signal:#C0524A; --verify:#4E9E93;
+  --sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);
+  background-image:linear-gradient(rgba(46,59,84,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(46,59,84,.28) 1px,transparent 1px);
+  background-size:32px 32px;
+  color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px 96px}
+
+/* masthead */
+.masthead{padding:24px 0 0}
+.brandline{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.brand{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.brand span{color:var(--brass)}
+.sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+
+/* level switch — the signature control */
+.levels{margin:20px 0 0;border:1px solid var(--rule);border-radius:3px;background:var(--panel);overflow:hidden}
+.levelbtns{display:grid;grid-template-columns:repeat(3,1fr)}
+.levelbtns button{
+  appearance:none;background:transparent;border:0;border-right:1px solid var(--rule);
+  color:var(--muted);text-align:left;padding:14px 16px;cursor:pointer;font-family:var(--sans)
+}
+.levelbtns button:last-child{border-right:0}
+.levelbtns button .lname{display:block;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.levelbtns button .lhow{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.levelbtns button:hover{background:var(--panel-2);color:var(--ink)}
+.levelbtns button[aria-selected="true"]{background:var(--panel-2);color:var(--ink);box-shadow:inset 0 -3px 0 var(--brass)}
+.levelbtns button:focus-visible{outline:2px solid var(--brass);outline-offset:-3px}
+.levelnote{padding:11px 16px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+.levelnote b{color:var(--ink)}
+
+/* live strip */
+.live{margin-top:14px;border:1px solid var(--rule);border-radius:3px;background:var(--panel)}
+.livehead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--rule)}
+.livehead h2{margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:7px;vertical-align:middle}
+.dot.ok{background:var(--verify)} .dot.err{background:var(--signal)} .dot.wait{background:var(--brass)}
+.livestatus{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.tile{padding:12px 14px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.tile .tv{font-family:var(--mono);font-size:19px;font-weight:700}
+.tile .tl{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.tile.hero .tv{color:var(--brass)}
+
+.rail{position:relative;height:64px;margin:18px 22px 6px}
+.rail .track{position:absolute;top:29px;left:0;right:0;height:2px;background:var(--rule)}
+.rail .corridor{position:absolute;top:25px;height:10px;background:rgba(201,162,39,.16);border-left:2px solid var(--brass);border-right:2px solid var(--brass)}
+.tick{position:absolute;top:0;transform:translateX(-50%);text-align:center;width:92px}
+.tick .stem{width:1px;height:25px;background:var(--rule);margin:0 auto}
+.tick.key .stem{background:var(--ink)}
+.tick .val{font-family:var(--mono);font-size:12.5px;font-weight:700;margin-top:4px}
+.tick .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.tick.ten .val{color:var(--brass)}
+.railfoot{padding:4px 16px 13px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* sub tabs */
+nav.tabs{display:flex;gap:2px;flex-wrap:wrap;margin:22px 0 0;border-bottom:1px solid var(--rule)}
+nav.tabs button{appearance:none;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted);
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:11px 13px;cursor:pointer}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brass)}
+nav.tabs button:focus-visible{outline:2px solid var(--brass);outline-offset:-2px}
+.pane{display:none;padding-top:26px}
+.pane.on{display:block}
+
+h3.section{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:34px 0 12px}
+h3.section:first-child{margin-top:0}
+p.lede{color:var(--muted);max-width:64ch;margin:0 0 18px}
+
+/* lesson cards (basic) */
+.lesson{border:1px solid var(--rule);background:var(--panel);border-radius:3px;margin-bottom:10px;overflow:hidden}
+.lesson > summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:38px 1fr 26px;gap:12px;align-items:center}
+.lesson > summary::-webkit-details-marker{display:none}
+.lesson > summary:hover{background:var(--panel-2)}
+.lesson > summary:focus-visible{outline:2px solid var(--brass);outline-offset:-2px}
+.lnum{font-family:var(--mono);font-size:12px;color:var(--brass)}
+.ltitle{font-weight:650;font-size:16px}
+.ldone{width:20px;height:20px;border:1px solid var(--rule);border-radius:2px;display:grid;place-items:center;font-size:12px;color:var(--muted)}
+.ldone.on{background:var(--brass);border-color:var(--brass);color:var(--ground);font-weight:800}
+.lbody{padding:4px 16px 18px 66px;border-top:1px solid var(--rule)}
+.lbody p{margin:12px 0 0;font-size:15.5px}
+.lbody .pic{margin-top:12px;border-left:2px solid var(--rule);padding:2px 0 2px 13px;color:var(--muted);font-size:14.5px}
+.lbody .know{margin-top:14px;font-family:var(--mono);font-size:12.5px;color:var(--verify);border-top:1px dashed var(--rule);padding-top:10px}
+.lbody .know b{color:var(--muted);font-weight:400}
+.markrow{margin-top:14px}
+
+/* glossary */
+.gloss{border:1px solid var(--rule);background:var(--panel);border-radius:3px;padding:12px 15px;margin-bottom:7px}
+.gloss b{display:block;font-size:14.5px;margin-bottom:2px}
+.gloss span{color:var(--muted);font-size:14px}
+
+/* mechanics / modules */
+.mod{border:1px solid var(--rule);border-radius:3px;background:var(--panel);margin-bottom:10px;overflow:hidden}
+.mod > summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:48px 1fr auto;gap:13px;align-items:center}
+.mod > summary::-webkit-details-marker{display:none}
+.mod > summary:hover{background:var(--panel-2)}
+.mno{font-family:var(--mono);font-size:12px;color:var(--brass)}
+.mtitle{font-weight:650;font-size:15.5px}
+.mstate{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--rule);padding:3px 8px;border-radius:2px;white-space:nowrap}
+.mstate.s3{color:var(--verify);border-color:var(--verify)}
+.mstate.s4{color:var(--brass);border-color:var(--brass)}
+.mbody{padding:2px 16px 18px 77px;border-top:1px solid var(--rule)}
+.mbody h4{margin:15px 0 6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mbody ul{margin:0;padding-left:18px}
+.mbody li{margin-bottom:5px}
+.mbody .where{font-family:var(--mono);font-size:12px;color:var(--verify)}
+.statebar{display:flex;gap:6px;flex-wrap:wrap;margin-top:15px}
+.statebar button{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:2px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;cursor:pointer}
+.statebar button:hover{color:var(--ink);border-color:var(--ink)}
+.statebar button[data-on="1"]{color:var(--ground);background:var(--brass);border-color:var(--brass);font-weight:700}
+
+.mech{border:1px solid var(--rule);background:var(--panel);border-radius:3px;padding:14px 16px;margin-bottom:9px}
+.mech h5{margin:0 0 6px;font-size:14.5px;font-weight:650}
+.mech p{margin:0 0 9px}
+.mech .verify{font-family:var(--mono);font-size:11.5px;color:var(--verify);display:block;border-top:1px dashed var(--rule);padding-top:8px}
+.mech .verify b{color:var(--muted);font-weight:400}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:8px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.mono,th.mono{font-family:var(--mono);font-size:12.5px}
+tr.blocked td{color:var(--signal)}
+.tier{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);padding:2px 6px;border-radius:2px;color:var(--muted);white-space:nowrap}
+.tier.p{color:var(--verify);border-color:var(--verify)}
+.tier.m{color:var(--brass);border-color:var(--brass)}
+a{color:var(--ink);border-bottom:1px solid var(--rule);text-decoration:none}
+a:hover{border-bottom-color:var(--brass)}
+
+/* calculators + forms */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(305px,1fr));gap:12px}
+.calc{border:1px solid var(--rule);background:var(--panel);border-radius:3px;padding:15px 16px}
+.calc h5{margin:0 0 4px;font-size:14.5px}
+.calc .hint{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.field{display:grid;grid-template-columns:1fr 104px;gap:8px;align-items:center;margin-bottom:7px}
+.field label{font-size:12.5px;color:var(--muted)}
+input,textarea,select{background:var(--ground);border:1px solid var(--rule);color:var(--ink);
+  font-family:var(--mono);font-size:12.5px;padding:6px 8px;border-radius:2px;width:100%}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--brass);outline-offset:-1px}
+.out{margin-top:12px;border-top:1px solid var(--rule);padding-top:10px;font-family:var(--mono);font-size:13px}
+.out .big{font-size:19px;font-weight:700;color:var(--brass)}
+.out .row{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-top:5px}
+.out .row b{color:var(--ink);font-weight:600}
+
+/* quiz + drill */
+.q{border:1px solid var(--rule);background:var(--panel);border-radius:3px;padding:14px 16px;margin-bottom:9px}
+.q .qmeta{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.q .qtext{font-weight:600;margin-bottom:10px;font-size:15.5px}
+.q textarea{min-height:62px;resize:vertical}
+.q .ans{display:none;margin-top:11px;border-top:1px dashed var(--rule);padding-top:10px;font-size:14px}
+.q.open .ans{display:block}
+.qbtns{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.qbtns button{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:2px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;cursor:pointer}
+.qbtns button:hover{color:var(--ink);border-color:var(--ink)}
+
+.logform{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px;border:1px solid var(--rule);background:var(--panel);border-radius:3px;padding:15px 16px;margin-bottom:14px}
+.logform .full{grid-column:1/-1}
+.logform label{display:block;font-size:10.5px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+
+.btn{background:var(--brass);color:var(--ground);border:0;border-radius:2px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:9px 16px;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--rule)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--ink)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+.notice{border:1px solid var(--rule);border-left:2px solid var(--brass);background:var(--panel);padding:12px 15px;border-radius:3px;font-size:13px;color:var(--muted);margin-bottom:16px}
+.notice.warn{border-left-color:var(--signal)}
+.notice b{color:var(--ink)}
+.notice code{font-family:var(--mono);font-size:12px;color:var(--verify);word-break:break-all}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--rule);font-family:var(--mono);font-size:11px;color:var(--muted)}
+.progress{height:3px;background:var(--rule);border-radius:2px;overflow:hidden;margin:14px 0 20px}
+.progress i{display:block;height:100%;background:var(--brass);width:0}
+
+@media (max-width:680px){
+  .brand{font-size:20px}
+  .levelbtns{grid-template-columns:1fr}
+  .levelbtns button{border-right:0;border-bottom:1px solid var(--rule)}
+  .lbody{padding-left:16px} .mbody{padding-left:16px}
+  .tick{width:64px} .tick .lbl{font-size:8px}
+  .field{grid-template-columns:1fr 90px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="brandline">
+    <div class="brand">Rate <span>Desk</span></div>
+    <div class="sub">Private · domestic interest rate market · resource mobilisation</div>
+  </div>
+
+  <div class="levels">
+    <div class="levelbtns" role="tablist">
+      <button role="tab" data-level="basic" aria-selected="true">
+        <span class="lname">Basic</span><span class="lhow">Read · one idea at a time</span></button>
+      <button role="tab" data-level="inter" aria-selected="false">
+        <span class="lname">Intermediate</span><span class="lhow">Work · mechanism and numbers</span></button>
+      <button role="tab" data-level="adv" aria-selected="false">
+        <span class="lname">Advanced</span><span class="lhow">Argue · write before you look</span></button>
+    </div>
+    <div class="levelnote" id="levelNote"></div>
+  </div>
+
+  <div class="live">
+    <div class="livehead">
+      <h2>Live market</h2>
+      <div class="livestatus"><span class="dot wait" id="feedDot"></span><span id="feedStatus">Not connected</span></div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="rail" id="rail"><div class="track"></div><div class="corridor" id="corridor"></div></div>
+    <div class="railfoot" id="railFoot">—</div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" id="subnav"></nav>
+
+<!-- ==================== BASIC ==================== -->
+<section class="pane on" id="p-basic-learn">
+  <p class="lede">Sixteen ideas, in order. Each one is short. Read it, then say the last line out loud in your own words. If you cannot, read it again before moving on.</p>
+  <div class="progress"><i id="basicBar"></i></div>
+  <div id="lessons"></div>
+</section>
+
+<section class="pane" id="p-basic-words">
+  <p class="lede">The words people will use around you from day one, in plain English.</p>
+  <div id="glossary"></div>
+</section>
+
+<section class="pane" id="p-basic-check">
+  <p class="lede">Ten short questions. If you get one wrong, go back to the lesson named next to it.</p>
+  <div id="basicQuiz"></div>
+</section>
+
+<!-- ==================== INTERMEDIATE ==================== -->
+<section class="pane" id="p-inter-mods">
+  <p class="lede">Ten modules in dependency order. You cannot price a bond until you can price the curve under it. Mark your own state honestly.</p>
+  <div id="modules"></div>
+</section>
+
+<section class="pane" id="p-inter-mech">
+  <p class="lede">How each piece actually works. No numbers on these cards — numbers go stale, mechanisms do not. Each card names the document to check before you quote a figure.</p>
+  <div id="mechList"></div>
+</section>
+
+<section class="pane" id="p-inter-calc">
+  <p class="lede">Four sums you will run every week. Everything is worked out inside your browser.</p>
+  <div class="grid2">
+    <div class="calc">
+      <h5>Spread over the base curve</h5>
+      <p class="hint">Your bond's yield against the government bond of the same tenor. This is the number the market judges you on.</p>
+      <div class="field"><label for="s_issue">Your issue yield %</label><input type="number" id="s_issue" value="7.45" step="0.01"></div>
+      <div class="field"><label for="s_base">Same-tenor G-sec %</label><input type="number" id="s_base" value="6.77" step="0.01"></div>
+      <div class="out"><div class="big" id="s_out">—</div>
+        <div class="row"><span>What 1 bp costs on ₹1,000 cr for 10 years</span><b id="s_cost">—</b></div></div>
+    </div>
+    <div class="calc">
+      <h5>Price, duration and PV01</h5>
+      <p class="hint">Plain bond, annual coupon, whole years, ₹100 face. PV01 is what one basis point is worth.</p>
+      <div class="field"><label for="b_cpn">Coupon % a year</label><input type="number" id="b_cpn" value="7.40" step="0.01"></div>
+      <div class="field"><label for="b_ytm">Yield %</label><input type="number" id="b_ytm" value="7.45" step="0.01"></div>
+      <div class="field"><label for="b_n">Years left</label><input type="number" id="b_n" value="10" step="1" min="1" max="40"></div>
+      <div class="out"><div class="big" id="b_price">—</div>
+        <div class="row"><span>Macaulay duration</span><b id="b_mac">—</b></div>
+        <div class="row"><span>Modified duration</span><b id="b_mod">—</b></div>
+        <div class="row"><span>PV01 per ₹100 face</span><b id="b_pv01">—</b></div>
+        <div class="row"><span>PV01 on ₹1,000 cr</span><b id="b_pv01c">—</b></div></div>
+    </div>
+    <div class="calc">
+      <h5>All-in cost of an issue</h5>
+      <p class="hint">Coupon plus every cost of getting the money in, spread over the tenor. This is what belongs in the note, not the coupon.</p>
+      <div class="field"><label for="a_cpn">Coupon % a year</label><input type="number" id="a_cpn" value="7.40" step="0.01"></div>
+      <div class="field"><label for="a_size">Issue size ₹ cr</label><input type="number" id="a_size" value="1000" step="50"></div>
+      <div class="field"><label for="a_cost">Upfront costs ₹ cr</label><input type="number" id="a_cost" value="1.20" step="0.05"></div>
+      <div class="field"><label for="a_n">Tenor, years</label><input type="number" id="a_n" value="10" step="1" min="1" max="40"></div>
+      <div class="out"><div class="big" id="a_out">—</div>
+        <div class="row"><span>Above the coupon by</span><b id="a_up">—</b></div>
+        <div class="row"><span>Money actually received</span><b id="a_net">—</b></div></div>
+    </div>
+    <div class="calc">
+      <h5>Pay-fixed swap breakeven</h5>
+      <p class="hint">You owe floating and are thinking of paying fixed. Above the breakeven average, the swap paid for itself.</p>
+      <div class="field"><label for="w_fix">Swap fixed rate %</label><input type="number" id="w_fix" value="6.60" step="0.01"></div>
+      <div class="field"><label for="w_flt">Floating rate today %</label><input type="number" id="w_flt" value="5.45" step="0.01"></div>
+      <div class="field"><label for="w_not">Notional ₹ cr</label><input type="number" id="w_not" value="1000" step="50"></div>
+      <div class="field"><label for="w_n">Tenor, years</label><input type="number" id="w_n" value="5" step="1" min="1" max="20"></div>
+      <div class="out"><div class="big" id="w_out">—</div>
+        <div class="row"><span>Cost in year 1 if floating does not move</span><b id="w_carry">—</b></div>
+        <div class="row"><span>Floating must average above</span><b id="w_be">—</b></div></div>
+    </div>
+  </div>
+  <div class="notice" style="margin-top:16px">These are first-read tools on simplified conventions — annual coupon, whole years, no accrued interest, no day count, no discounting of swap legs. Anything going to the Board gets rebuilt on the real convention of the real instrument.</div>
+</section>
+
+<!-- ==================== ADVANCED ==================== -->
+<section class="pane" id="p-adv-drill">
+  <p class="lede">Write your answer in the box before you reveal anything. An answer you can only recognise is not an answer you can give in a meeting.</p>
+  <div class="btnrow" style="margin-bottom:16px"><button class="btn ghost" id="drillReset">Clear my answers</button></div>
+  <div id="drillList"></div>
+</section>
+
+<section class="pane" id="p-adv-sources">
+  <h3 class="section">Read these</h3>
+  <p class="lede">Primary sources are the event. Everything else is coverage of the event. When the two disagree, the primary wins and the other goes on the blocked list.</p>
+  <table><thead><tr><th>Source</th><th>Tier</th><th>What to pull</th><th>How often</th></tr></thead><tbody id="srcBody"></tbody></table>
+  <h3 class="section">Blocked — do not cite, do not feed to PFC-NRD</h3>
+  <table><thead><tr><th>Source</th><th>Why</th></tr></thead><tbody>
+    <tr class="blocked"><td>DealPlexus</td><td>Quoted the 10Y at 7.12% on 21 July 2026 with identical open, high, low and close, and a 52-week range of one single value. Stale or broken feed.</td></tr>
+    <tr class="blocked"><td>The Indian Eye</td><td>Reported June 2026 CPI as exceeding the RBI's upper tolerance. 4.38% is above the 4% target and well inside the 6% ceiling. A source that confuses target with band cannot be used on RBI topics.</td></tr>
+  </tbody></table>
+  <h3 class="section">The rhythm</h3>
+  <div id="cadenceList"></div>
+  <h3 class="section">Dates on the board</h3>
+  <table><thead><tr><th>Date</th><th>Event</th><th>Why it matters to you</th></tr></thead><tbody>
+    <tr><td class="mono">3–5 Aug 2026</td><td>RBI Monetary Policy Committee</td><td>June held at 5.25% unanimously, kept a neutral stance, raised the FY27 CPI forecast to 5.1%. Watch the stance wording and any liquidity measure more closely than the rate.</td></tr>
+    <tr><td class="mono">12 Aug 2026</td><td>CPI for July 2026, MoSPI</td><td>June came in at 4.38% against 3.93% in May. A second straight rise changes the shape of your August to October window.</td></tr>
+    <tr><td class="mono">15th and month-end</td><td>FIMMDA polling for the corporate bond matrix</td><td>The PSU-FI AAA spread that prices your paper resets off these polls. Know the matrix before you speak to the arranger.</td></tr>
+  </tbody></table>
+</section>
+
+<section class="pane" id="p-adv-log">
+  <p class="lede">One line a day. After sixty lines you will read the market from your own series instead of somebody's headline.</p>
+  <div class="logform">
+    <div><label for="lg_date">Date</label><input type="date" id="lg_date"></div>
+    <div><label for="lg_10y">10Y G-sec %</label><input type="number" id="lg_10y" step="0.01" placeholder="6.77"></div>
+    <div><label for="lg_spr">PSU AAA 10Y spread bp</label><input type="number" id="lg_spr" step="1" placeholder="68"></div>
+    <div><label for="lg_ust">US 10Y %</label><input type="number" id="lg_ust" step="0.01" placeholder="4.63"></div>
+    <div><label for="lg_oil">Brent $/bbl</label><input type="number" id="lg_oil" step="0.1" placeholder="86.5"></div>
+    <div><label for="lg_fx">USDINR</label><input type="number" id="lg_fx" step="0.01" placeholder="92.00"></div>
+    <div class="full"><label for="lg_note">What moved it, and what you would do about it</label><textarea id="lg_note" rows="2" placeholder="Auction cut-off, OMO, CPI print, FPI flow, arranger feedback…"></textarea></div>
+    <div class="full btnrow">
+      <button class="btn" id="lg_save">Save entry</button>
+      <button class="btn ghost" id="lg_fill">Fill from live feed</button>
+      <button class="btn ghost" id="lg_csv">Export CSV</button>
+      <button class="btn ghost" id="lg_json">Export all as JSON</button>
+      <button class="btn ghost" id="lg_import">Import JSON</button>
+    </div>
+  </div>
+  <table><thead><tr><th>Date</th><th class="mono">10Y</th><th class="mono">Spread</th><th class="mono">UST</th><th class="mono">Brent</th><th class="mono">INR</th><th>Note</th><th></th></tr></thead>
+  <tbody id="logBody"></tbody></table>
+</section>
+
+<section class="pane" id="p-adv-feed">
+  <h3 class="section">Connect the live feed</h3>
+  <div class="notice warn"><b>Read this once.</b> A site published by GitHub Pages is readable by anyone who finds the address, on a free account. Nothing in this file is PFC material, so that is acceptable — but treat it as unlisted, not private. Never add issuance, pricing, counterparty or borrowing-plan data to the repository.</div>
+
+  <div class="calc" style="max-width:620px">
+    <h5>Feed settings</h5>
+    <p class="hint">The default path works as soon as the file and its data folder sit in the same repository. Change it only if you keep the data somewhere else.</p>
+    <div class="field"><label for="cfg_url">Feed path or URL</label><input type="text" id="cfg_url" value="data/rates.json"></div>
+    <div class="field"><label for="cfg_mins">Refresh every, minutes</label><input type="number" id="cfg_mins" value="10" min="1" max="120" step="1"></div>
+    <div class="btnrow"><button class="btn" id="cfg_save">Save and connect</button><button class="btn ghost" id="cfg_now">Refresh now</button><button class="btn ghost" id="cfg_clear">Disconnect</button></div>
+    <div class="out"><div id="cfg_msg" style="font-size:12px;color:var(--muted)">Not connected.</div></div>
+  </div>
+
+  <h3 class="section">What the repository looks like</h3>
+  <p class="lede">Four files. The page reads the JSON from the same site it was served by, so there is no cross-origin problem and nothing outside GitHub is involved.</p>
+  <div class="notice"><code>rate-desk.html</code> — this page<br>
+  <code>data/rates.json</code> — the numbers the page reads<br>
+  <code>scripts/update_rates.py</code> — writes that JSON<br>
+  <code>.github/workflows/update-rates.yml</code> — runs the script on a schedule and commits the result</div>
+
+  <h3 class="section">The JSON the page expects</h3>
+  <p class="lede">A flat object. Any key it does not recognise is ignored, so you can keep your own working in the same file.</p>
+  <table><thead><tr><th>Key</th><th>Example</th><th>What it feeds</th></tr></thead><tbody>
+    <tr><td class="mono">REPO</td><td class="mono">5.25</td><td>Corridor middle</td></tr>
+    <tr><td class="mono">SDF</td><td class="mono">5.00</td><td>Corridor floor</td></tr>
+    <tr><td class="mono">MSF</td><td class="mono">5.50</td><td>Corridor ceiling</td></tr>
+    <tr><td class="mono">GSEC10Y</td><td class="mono">6.77</td><td>Headline tile and the rail marker</td></tr>
+    <tr><td class="mono">AAA10Y</td><td class="mono">7.45</td><td>PSU AAA 10Y yield; the spread tile is worked out from it</td></tr>
+    <tr><td class="mono">CPI</td><td class="mono">4.38</td><td>Latest CPI tile</td></tr>
+    <tr><td class="mono">USDINR</td><td class="mono">92.00</td><td>Currency tile</td></tr>
+    <tr><td class="mono">BRENT</td><td class="mono">86.50</td><td>Crude tile</td></tr>
+    <tr><td class="mono">US10Y</td><td class="mono">4.63</td><td>US 10Y tile</td></tr>
+    <tr><td class="mono">UPDATED</td><td class="mono">2026-07-31 17:30 IST</td><td>Shown next to the connection light</td></tr>
+    <tr><td class="mono">SOURCE</td><td class="mono">manual</td><td>Where the numbers came from, shown in the status line</td></tr>
+  </tbody></table>
+
+  <h3 class="section">Turning it on</h3>
+  <p class="lede">Once the workflow is committed, the Action runs on its schedule, rewrites the JSON and commits it. Pages republishes within a minute or two, and this page picks it up on its next refresh without you touching anything.</p>
+  <div class="notice"><b>Before you enable any scraper.</b> Site terms differ. CCIL states on its own pages that it does not authorise commercial use of its website data without written permission. Do not point an automated job at a source until someone in PFC has looked at its terms. The workflow ships with automatic sources switched off and manual entry switched on, which is why it works from day one and creates no exposure.</div>
+  <div class="notice"><b>If the light stays red.</b> On GitHub Pages the path is relative, so <code>data/rates.json</code> must sit beside this file. Opening the HTML straight off your disk with a file:// address will block the fetch — serve it, or use the manual boxes below.</div>
+
+  <h3 class="section">Enter levels by hand</h3>
+  <p class="lede">Use this when there is no feed. Anything typed here is overwritten the next time the feed refreshes.</p>
+  <div class="grid2"><div class="calc">
+    <div class="field"><label for="rSDF">SDF %</label><input type="number" id="rSDF" value="5.00" step="0.05"></div>
+    <div class="field"><label for="rRepo">Repo %</label><input type="number" id="rRepo" value="5.25" step="0.05"></div>
+    <div class="field"><label for="rMSF">MSF %</label><input type="number" id="rMSF" value="5.50" step="0.05"></div>
+    <div class="field"><label for="r10Y">10Y G-sec %</label><input type="number" id="r10Y" value="6.77" step="0.01"></div>
+    <div class="field"><label for="rAAA">PSU AAA 10Y %</label><input type="number" id="rAAA" value="7.45" step="0.01"></div>
+  </div></div>
+</section>
+
+<footer>
+  <div id="storeState">Checking where your progress is saved…</div>
+  <div style="margin-top:6px">The only outside call this page makes is to your own Google Sheet, and only if you connect one. No fonts, scripts or trackers are loaded from anywhere.</div>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------- storage ---------- */
+var MEM={}, HAS_STORE=false;
+try{ if(window.storage && typeof window.storage.get==="function") HAS_STORE=true; }catch(e){ HAS_STORE=false; }
+function storeGet(k){
+  if(HAS_STORE) return window.storage.get(k).then(function(r){return r?r.value:null}).catch(function(){return null});
+  return Promise.resolve(k in MEM?MEM[k]:null);
+}
+function storeSet(k,v){
+  if(HAS_STORE) return window.storage.set(k,v).catch(function(){MEM[k]=v});
+  MEM[k]=v; return Promise.resolve();
+}
+document.getElementById("storeState").textContent = HAS_STORE
+  ? "Progress saves automatically in this browser. Export the JSON before moving the file to another machine."
+  : "This copy is not saving between sessions. Use Export all as JSON on the Market log tab to keep your progress, and Import JSON to bring it back.";
+
+var STATE={lessons:{},mod:{},drill:{},quiz:{},log:[],manual:{},cfg:{url:"data/rates.json",mins:10},level:"basic",tab:{}};
+function saveState(){ storeSet("ratedesk2", JSON.stringify(STATE)); }
+
+/* ---------- level + tab structure ---------- */
+var LEVELS={
+  basic:{note:"<b>How this level teaches.</b> One idea per card, plain words, and a line you must be able to say back. Nothing here assumes you have seen a bond before. Work through in order and tick each card off.",
+    tabs:[["basic-learn","Lessons"],["basic-words","Words"],["basic-check","Quick check"]]},
+  inter:{note:"<b>How this level teaches.</b> Mechanism first, then the number. Each card names the circular to verify against instead of quoting a figure at you, and every calculation is one you will actually run on the desk.",
+    tabs:[["inter-mods","Modules"],["inter-mech","How it works"],["inter-calc","Calculators"]]},
+  adv:{note:"<b>How this level teaches.</b> You write first, then you look. The questions have no single right answer — they test whether you can structure one under challenge, which is what a Board meeting actually asks of you.",
+    tabs:[["adv-drill","Drill"],["adv-sources","Sources & rhythm"],["adv-log","Market log"],["adv-feed","Live feed"]]}
+};
+function setLevel(lv){
+  STATE.level=lv; saveState();
+  document.querySelectorAll(".levelbtns button").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.level===lv?"true":"false"); });
+  document.getElementById("levelNote").innerHTML=LEVELS[lv].note;
+  var nav=document.getElementById("subnav"); nav.innerHTML="";
+  LEVELS[lv].tabs.forEach(function(t,i){
+    var b=document.createElement("button"); b.setAttribute("role","tab");
+    b.dataset.pane=t[0]; b.textContent=t[1]; b.setAttribute("aria-selected", i===0?"true":"false");
+    nav.appendChild(b);
+  });
+  var want = STATE.tab[lv] || LEVELS[lv].tabs[0][0];
+  if(!LEVELS[lv].tabs.some(function(t){return t[0]===want})) want=LEVELS[lv].tabs[0][0];
+  setPane(want);
+}
+function setPane(id){
+  document.querySelectorAll("#subnav button").forEach(function(b){ b.setAttribute("aria-selected", b.dataset.pane===id?"true":"false"); });
+  document.querySelectorAll("section.pane").forEach(function(p){ p.classList.remove("on"); });
+  var el=document.getElementById("p-"+id); if(el) el.classList.add("on");
+  STATE.tab[STATE.level]=id; saveState();
+}
+document.querySelectorAll(".levelbtns button").forEach(function(b){
+  b.addEventListener("click",function(){ setLevel(b.dataset.level); window.scrollTo({top:0,behavior:"instant"}); });
+});
+document.getElementById("subnav").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("button[data-pane]"):null; if(!b) return;
+  setPane(b.dataset.pane); window.scrollTo({top:0,behavior:"instant"});
+});
+
+/* ---------- BASIC: lessons ---------- */
+var LESSONS=[
+{t:"Interest is rent on money",
+ p:"When you borrow money, you pay rent for it. That rent is called interest. The rate tells you how much rent you pay each year for every 100 rupees you borrowed.",
+ pic:"You rent a house by the month. You rent money by the year.",
+ k:"7% on ₹100 crore costs ₹7 crore for one year."},
+{t:"A bond is a written promise",
+ p:"A bond is a loan cut into small pieces so that many people can lend at once. PFC writes the promise. Investors give money today. PFC pays interest every year, and returns the full amount on the last day.",
+ pic:"Like a fixed deposit — except the paper can be sold to somebody else in between.",
+ k:"A bond has three parts: how much, for how long, at what interest."},
+{t:"Coupon is fixed. Yield moves.",
+ p:"The coupon is the interest printed on the bond. It never changes. The yield is the return a buyer earns at today's price. Prices change every day, so the yield changes every day.",
+ pic:"A ₹100 bond pays ₹7 a year. If somebody buys it for ₹95, they still get ₹7. Their return is more than 7%.",
+ k:"Two bonds with the same coupon can have completely different yields."},
+{t:"Price up, yield down. Always.",
+ p:"The bond pays a fixed number of rupees. If you pay more to buy it, you earn less. If you pay less, you earn more. Price and yield always move in opposite directions.",
+ pic:"₹7 from a ₹95 purchase is a better deal than ₹7 from a ₹105 purchase.",
+ k:"When the news says bond prices fell, you should immediately think: yields rose."},
+{t:"Basis points",
+ p:"The market never says 0.25%. It says 25 basis points. One basis point is 0.01%. One hundred basis points make 1%. People write it as bp.",
+ pic:"On ₹1,000 crore, one basis point for one year is ₹10 lakh. Small word, real money.",
+ k:"You can move between percent and bp without stopping to think."},
+{t:"G-sec: the government's bond",
+ p:"The government borrows by selling bonds called government securities, or G-secs. The government prints its own currency, so it will not fail to repay in rupees. That makes its rate the lowest rate in the country.",
+ pic:"Everyone else in India borrows at the government's rate plus something.",
+ k:"The G-sec is called the base rate or the risk-free rate, and you can say why."},
+{t:"The 10-year benchmark",
+ p:"Among all G-secs, one is traded far more than the rest — usually the newest one with about ten years left. That is the benchmark. It is the headline number for the whole market.",
+ pic:"When a report says Indian yields rose today, it almost always means this one bond.",
+ k:"The 10-year benchmark is the single number to check first every morning."},
+{t:"Spread: what you pay above the government",
+ p:"PFC is strong, but it is not the government. Investors want extra return for lending to you instead. That extra is the spread, and it is always said in basis points.",
+ pic:"G-sec at 6.77% and your bond at 7.45% means a spread of 68 bp.",
+ k:"You can split your own borrowing cost into two parts: the base and the spread."},
+{t:"The RBI sets the short rate",
+ p:"The Reserve Bank of India is the central bank. It fixes the repo rate, which is what banks pay to borrow from the RBI for a very short period. Every short-term rate in the country is anchored to it.",
+ pic:"The repo rate is the tap. Turn it, and short-term money gets cheaper or dearer.",
+ k:"The repo rate is a short-term rate. It is not the rate the government borrows at for ten years."},
+{t:"The corridor: floor, middle, ceiling",
+ p:"The RBI does not set only one rate. It sets three. Banks can park spare cash with the RBI at the floor rate. They can borrow in an emergency at the ceiling rate. The repo sits in the middle. Overnight money stays between the floor and the ceiling.",
+ pic:"If overnight money is sitting near the floor, banks have cash to spare. Near the ceiling, cash is tight.",
+ k:"You can look at where overnight money is trading and say whether cash is plentiful or short."},
+{t:"Inflation is why rates move",
+ p:"Inflation means prices are rising. It is measured by the consumer price index, or CPI. The RBI has been given a target of 4%, and is allowed to let CPI sit anywhere between 2% and 6%. When inflation climbs, the RBI stops cutting, or raises.",
+ pic:"If your money buys less next year, a lender wants a higher rate to make up for it.",
+ k:"4% is the target. 2% to 6% is the band. They are not the same thing, and most reporters get this wrong."},
+{t:"Short and long are two different markets",
+ p:"Short-term rates follow the RBI closely. Long-term rates follow something else: what people expect inflation to be for many years, and how much the government plans to borrow. The RBI can hold the repo steady while the ten-year yield rises.",
+ pic:"The RBI controls the near end of the rope. The market controls the far end.",
+ k:"You will not explain a move in the 10-year by pointing only at the repo rate."},
+{t:"The curve",
+ p:"Draw yields for every maturity, from three months to forty years, and join them. That line is the yield curve. Usually it slopes up, because lending for longer is riskier. A big gap between short and long is called steep. A small gap is flat.",
+ pic:"Steep curve: short money looks cheap and long money looks dear.",
+ k:"You can look at a curve and say whether it is steep or flat, and what that tempts a borrower to do."},
+{t:"Fixed and floating",
+ p:"A fixed rate never changes for the whole life of the loan. A floating rate moves with a benchmark, so it changes every few months. Fixed gives you certainty. Floating gives you today's lower rate and tomorrow's uncertainty.",
+ pic:"Fixed is a known cost. Floating is an unknown cost that happens to be lower right now.",
+ k:"Neither one is safer in general. It depends on what your assets do when rates move."},
+{t:"A swap, in one line",
+ p:"Two parties agree to exchange one kind of interest for another, without moving the loan itself. A borrower who owes floating and fears rising rates agrees to pay fixed and receive floating.",
+ pic:"The floating you receive cancels the floating you owe. You are left with a known fixed cost.",
+ k:"A swap changes the shape of your cost. It does not change how much you borrowed."},
+{t:"What your desk actually does",
+ p:"Resource mobilisation raises the money PFC lends. The job is not to get the lowest rate. It is to get the lowest cost that is still safe — the right amount, at the right time, in a shape the balance sheet can carry.",
+ pic:"You have three levers: when you go to market, what tenor you choose, and how you package the issue.",
+ k:"You can say, in one sentence, why the cheapest borrowing is not always the right borrowing."}
+];
+function renderLessons(){
+  var w=document.getElementById("lessons"); w.innerHTML="";
+  LESSONS.forEach(function(L,i){
+    var done = !!STATE.lessons[i];
+    var d=document.createElement("details"); d.className="lesson";
+    d.innerHTML='<summary><span class="lnum">'+(i+1<10?"0":"")+(i+1)+'</span><span class="ltitle">'+L.t+'</span>'+
+      '<span class="ldone'+(done?" on":"")+'">'+(done?"✓":"")+'</span></summary>'+
+      '<div class="lbody"><p>'+L.p+'</p><div class="pic">'+L.pic+'</div>'+
+      '<div class="know"><b>You know this when you can say: </b>'+L.k+'</div>'+
+      '<div class="markrow"><button class="btn ghost" data-lesson="'+i+'">'+(done?"Mark as not done":"I can say this")+'</button></div></div>';
+    w.appendChild(d);
+  });
+  var done=Object.keys(STATE.lessons).filter(function(k){return STATE.lessons[k]}).length;
+  document.getElementById("basicBar").style.width=Math.round(done/LESSONS.length*100)+"%";
+}
+document.getElementById("lessons").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-lesson]"):null; if(!b) return;
+  var i=b.dataset.lesson; STATE.lessons[i]=!STATE.lessons[i]; saveState();
+  var wasOpen=b.closest("details");
+  renderLessons();
+  var all=document.querySelectorAll("#lessons details"); if(all[i]) all[i].open=true;
+});
+
+/* ---------- BASIC: glossary ---------- */
+var GLOSS=[
+["Yield","The return you actually earn on a bond at today's price. Moves every day."],
+["Coupon","The interest printed on the bond. Never changes."],
+["Face value","The amount returned on the last day. Usually ₹100 per unit."],
+["Tenor","How long the bond runs before it is repaid."],
+["Basis point (bp)","One hundredth of one percent. 100 bp = 1%."],
+["G-sec","A bond issued by the central government."],
+["SDL","A bond issued by a state government."],
+["T-bill","Very short government borrowing, under one year, sold at a discount."],
+["Benchmark","The most traded bond of a tenor. The 10-year benchmark is the headline number."],
+["Spread","How much more than the government you pay, in bp."],
+["Repo rate","What banks pay to borrow from the RBI for a very short period."],
+["SDF","Standing deposit facility. Where banks park spare cash with the RBI. The corridor floor."],
+["MSF","Marginal standing facility. Emergency borrowing from the RBI. The corridor ceiling."],
+["CRR","The share of deposits a bank must keep with the RBI in cash."],
+["SLR","The share of deposits a bank must hold in government securities."],
+["OMO","Open market operation. The RBI buying or selling bonds to add or drain cash."],
+["Liquidity","How much spare cash the banking system is holding."],
+["CPI","Consumer price index. The measure of retail inflation."],
+["MPC","Monetary policy committee. The six members who decide the repo rate."],
+["Stance","The MPC's signal about where it is leaning next: accommodative, neutral or tightening."],
+["Yield curve","Yields plotted against maturity. Usually slopes upward."],
+["Steep / flat","A big gap between short and long yields is steep. A small gap is flat."],
+["Term premium","The extra return demanded for lending long instead of short."],
+["Auction","How the government sells bonds. Investors bid, and the RBI decides the cut-off."],
+["Cut-off","The worst price the RBI accepted at an auction. The market reads it closely."],
+["Bid-to-cover","Total bids divided by the amount on offer. A quick read of demand."],
+["Devolvement","When bids are too weak, the paper is forced onto primary dealers."],
+["Primary dealer","A firm obliged to bid at every government auction."],
+["NDS-OM","The RBI's electronic platform where G-secs are traded."],
+["CCIL","The Clearing Corporation of India. It settles the trades and publishes the data."],
+["FBIL","Financial Benchmarks India. It publishes MIBOR and the official valuation curve."],
+["FIMMDA","The market body that publishes the corporate bond spread matrix."],
+["EBP","Electronic bidding platform. Where large private placements must be issued."],
+["ISIN","The unique code for one bond line. The number of new ones per year is capped."],
+["Private placement","Selling a bond to a chosen set of investors rather than to the public."],
+["All-in cost","Coupon plus every issue expense, expressed as one yield."],
+["Negative carry","Losing money on cash you raised early and have not yet lent out."],
+["ALM","Asset liability management. Making sure what you owe and what you own line up."],
+["Duration","How much a bond's price moves when yields move. Longer bonds move more."],
+["PV01","The rupee change in value for a one basis point move."],
+["OIS","Overnight indexed swap. The main interest rate swap in India."],
+["FAR","Fully accessible route. The set of G-secs foreigners may buy without limit."],
+["FPI","Foreign portfolio investor."]
+];
+(function(){
+  var w=document.getElementById("glossary");
+  GLOSS.forEach(function(g){
+    var d=document.createElement("div"); d.className="gloss";
+    d.innerHTML="<b>"+g[0]+"</b><span>"+g[1]+"</span>"; w.appendChild(d);
+  });
+})();
+
+/* ---------- BASIC: quick check ---------- */
+var QUIZ=[
+{l:"Lesson 04",q:"Bond prices went up today. What happened to yields?",a:"They went down. Price and yield always move opposite."},
+{l:"Lesson 05",q:"The market says a bond widened by 30 bp. How much is that in percent?",a:"0.30%."},
+{l:"Lesson 08",q:"G-sec is 6.80%. Your bond prices at 7.50%. What is the spread?",a:"70 bp."},
+{l:"Lesson 11",q:"CPI prints at 5.4%. Has the RBI failed its mandate?",a:"No. The target is 4% and the band is 2% to 6%. 5.4% is inside the band. Failure is defined as staying outside the band for three quarters in a row."},
+{l:"Lesson 09",q:"Is the repo rate the rate the government pays on a ten-year bond?",a:"No. The repo is a very short-term rate. The ten-year is set by the market."},
+{l:"Lesson 12",q:"The RBI has not moved the repo for six months, but the 10-year yield rose 50 bp. Is that possible?",a:"Yes, and it is common. Long yields follow inflation expectations and government borrowing, not just the repo."},
+{l:"Lesson 10",q:"Overnight money is trading near the corridor floor. Is cash plentiful or tight?",a:"Plentiful. Banks have spare cash and are parking it with the RBI."},
+{l:"Lesson 03",q:"A ₹100 bond with a 7% coupon is bought at ₹90. Is the buyer's yield above or below 7%?",a:"Above. They pay less but still receive ₹7 a year plus ₹100 at the end."},
+{l:"Lesson 05",q:"One basis point on ₹2,000 crore for one year — how much in rupees?",a:"₹20 lakh."},
+{l:"Lesson 16",q:"Your desk can borrow 40 bp cheaper by issuing three-year paper instead of ten-year. Should you?",a:"Not automatically. Cheaper short money means you must come back to the market in three years, and the window may be worse. The saving is certain, the refinancing risk is not."}
+];
+function renderQuiz(){
+  var w=document.getElementById("basicQuiz"); w.innerHTML="";
+  QUIZ.forEach(function(x,i){
+    var el=document.createElement("div"); el.className="q";
+    el.innerHTML='<div class="qmeta">'+x.l+'</div><div class="qtext">'+x.q+'</div>'+
+      '<div class="qbtns"><button data-reveal="q'+i+'">Show answer</button></div>'+
+      '<div class="ans">'+x.a+'</div>';
+    w.appendChild(el);
+  });
+}
+document.getElementById("basicQuiz").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-reveal]"):null; if(!b) return;
+  var c=b.closest(".q"); c.classList.toggle("open");
+  b.textContent=c.classList.contains("open")?"Hide answer":"Show answer";
+});
+
+/* ---------- INTERMEDIATE: modules ---------- */
+var MODULES=[
+{n:"M01",t:"The base curve",
+ must:["Why a yield is a price, and what the 10-year is the price of.","Par yield against zero-coupon yield, and when the difference matters.","Term premium: what it pays for, and what widens it when the repo has not moved.","How to read a whole curve and say something useful about its shape."],
+ where:"CCIL Market Watch and Trading Summary for traded levels; FBIL for the published G-sec and SDL valuation curve."},
+{n:"M02",t:"The corridor and liquidity",
+ must:["The corridor: standing deposit facility as floor, repo in the middle, marginal standing facility as ceiling.","Why overnight money sits where it does inside the corridor, and what that says about surplus or deficit.","Variable rate repo and reverse repo auctions, open market operations, cash reserve ratio — which tool the RBI picks, and when.","Durable liquidity against frictional liquidity, and why only one of the two moves the 10-year."],
+ where:"RBI Weekly Statistical Supplement; RBI money market operations press releases; CCIL Weekly Market Update."},
+{n:"M03",t:"Inflation and the reaction function",
+ must:["How the CPI basket is built and which items actually swing the headline.","The flexible inflation targeting framework: the target, the band, and what a sustained breach obliges the RBI to do.","The real policy rate, and why a negative one ends the case for a cut.","How to read an MPC resolution: stance, vote split, forecast revision — in that order."],
+ where:"MoSPI CPI release, published on the 12th; RBI Monetary Policy Report; the MPC resolution and, two weeks later, the minutes."},
+{n:"M04",t:"The primary G-sec market",
+ must:["The half-yearly borrowing calendar, and how the weekly auction notification flows from it.","Multiple-price against uniform-price auctions, and what each does to bidder behaviour.","Competitive and non-competitive bidding; primary dealer underwriting, and devolvement.","Greenshoe, switches and buybacks as tools for managing the redemption profile."],
+ where:"RBI press releases for auction notifications and results; the half-yearly issuance calendar; RBI Master Direction on the government securities market."},
+{n:"M05",t:"The secondary market",
+ must:["NDS-OM: anonymous order-driven trading and the reported segment, and why the two can show different levels.","Who owns the paper — banks, insurers, provident funds, foreign investors — and how each behaves when yields move.","Repo, TREPS and the settlement cycle; how funding cost sits under every position.","The Fully Accessible Route, and why a change to it moves the long end more than the short end."],
+ where:"CCIL Trading Summary and Reported Deals; RBI circulars on the Fully Accessible Route and FPI limits."},
+{n:"M06",t:"Credit spread over the base",
+ must:["Why a AAA public financial institution trades above the sovereign at all.","The FIMMDA polled matrix: segments, rating buckets, tenor points, and the fortnightly reset.","Which part of your spread is credit and which is liquidity — and which one you can actually move.","Where PFC's last several issues cleared against the matrix on the day."],
+ where:"FIMMDA corporate bond valuation methodology and the published matrix; your own issuance history."},
+{n:"M07",t:"Issuance mechanics",
+ must:["Private placement against public issue: who you may approach, and the disclosure that follows each.","The electronic bidding platform: when it is mandatory, how bidding and allotment work, and what the cut-off says about demand.","ISIN limits per financial year, and how they force you to plan reissuance rather than fresh lines.","The chain after allotment — trustee, listing, depository — and the timeline on each step."],
+ where:"SEBI NCS Regulations and the SEBI master circular for issue and listing of non-convertible securities; NSE and BSE bidding platform operating guidelines."},
+{n:"M08",t:"The liability toolkit",
+ must:["Every instrument open to a non-banking financial company that is an infrastructure finance company, and the constraint on each.","Capital gain bonds, commercial paper, bank term loans, subordinated debt, external commercial borrowings — cost, tenor, and who buys.","Embedded options — call, put, staggered redemption, step-up — and what each costs you in spread.","Which instrument you reach for when the curve is steep, and which when it is flat."],
+ where:"RBI Master Direction on scale based regulation for non-banking financial companies; the RBI external commercial borrowings framework; your own board-approved borrowing plan."},
+{n:"M09",t:"Derivatives on the liability book",
+ must:["Overnight indexed swaps on the MIBOR benchmark: what is exchanged, and what is not.","Paying fixed against receiving fixed, and which one a borrower uses against a rising curve.","Why the swap curve and the bond curve differ, and what the gap is telling you.","The accounting and hedge designation consequence, decided before the trade rather than after."],
+ where:"FBIL benchmark publications; CCIL derivatives segment; the applicable hedge accounting standard."},
+{n:"M10",t:"Cost of funds and ALM",
+ must:["Marginal cost of borrowing against weighted average cost, and which belongs in a lending decision.","Negative carry: what pre-funding costs, and when it is still right.","The duration gap between the loan book and the borrowing book, and what closes it.","Refinancing concentration and rating triggers — the two things that turn a funding problem into a credit problem."],
+ where:"Your own asset liability management statements; rating agency criteria for infrastructure finance companies."}
+];
+var STATES=["Not started","Reading","Can explain","Can be challenged"];
+function renderModules(){
+  var wrap=document.getElementById("modules"); wrap.innerHTML="";
+  MODULES.forEach(function(m){
+    var st=STATE.mod[m.n]||0;
+    var d=document.createElement("details"); d.className="mod";
+    d.innerHTML='<summary><span class="mno">'+m.n+'</span><span class="mtitle">'+m.t+'</span>'+
+      '<span class="mstate s'+(st+1)+'">'+STATES[st]+'</span></summary>'+
+      '<div class="mbody"><h4>You must be able to answer</h4><ul>'+m.must.map(function(x){return "<li>"+x+"</li>"}).join("")+'</ul>'+
+      '<h4>Where it comes from</h4><div class="where">'+m.where+'</div>'+
+      '<div class="statebar" data-mod="'+m.n+'">'+STATES.map(function(s,i){return '<button data-i="'+i+'" data-on="'+(i===st?1:0)+'">'+s+'</button>'}).join("")+'</div></div>';
+    wrap.appendChild(d);
+  });
+}
+document.getElementById("modules").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest(".statebar button"):null; if(!b) return;
+  var mod=b.closest(".statebar").dataset.mod;
+  STATE.mod[mod]=+b.dataset.i; saveState(); renderModules();
+  var bar=document.querySelector('.statebar[data-mod="'+mod+'"]'); if(bar) bar.closest("details").open=true;
+});
+
+/* ---------- INTERMEDIATE: mechanics ---------- */
+var MECH=[
+{h:"Why the corridor sets the floor under everything",
+ p:"Overnight money cannot stay below the standing deposit facility, because a bank can always park there instead. It cannot stay above the marginal standing facility, because a bank can always borrow there. Everything you price is that overnight rate, plus a term premium, plus your credit spread. When somebody asks why your cost of funds moved, walk down that chain in order.",
+ v:"RBI Master Direction on the liquidity adjustment facility, and the operating procedure in the Monetary Policy Report."},
+{h:"Devolvement is a signal, not an accident",
+ p:"When bids at an auction are weaker than the RBI will accept, the paper is forced onto the primary dealers who underwrote it. That is the market refusing the government's price. If it happens in the tenor you were about to issue into, move your window.",
+ v:"RBI auction result press releases, and the Master Direction covering primary dealer underwriting obligations."},
+{h:"Your spread has two parts and you control only one",
+ p:"The spread over the sovereign is partly credit — what the market thinks of your book — and partly liquidity, meaning how easily an investor can sell your paper before maturity. Reissuing into existing lines builds size and cuts the liquidity part. A fresh line for every issue quietly widens it.",
+ v:"FIMMDA corporate bond valuation methodology; your own secondary trading volumes on the exchange debt segments."},
+{h:"ISIN limits force you to plan a year ahead",
+ p:"The number of new bond lines a company may create in a financial year is capped, which is what turns reissuance into a planning discipline rather than a preference. Spend the allocation on small opportunistic issues early, and you have nothing left when a large window opens.",
+ v:"SEBI master circular for issue and listing of non-convertible securities — the chapter on ISIN restrictions."},
+{h:"The bidding platform prices you in public",
+ p:"Above the prescribed threshold, private placement must go through the electronic bidding platform, so your cut-off and bid-to-cover are visible to every other issuer. Your last auction becomes the opening reference for your next one, and for your peers.",
+ v:"SEBI master circular on the electronic book provider platform; NSE and BSE operating guidelines."},
+{h:"A steep curve is an invitation and a trap",
+ p:"When the curve is steep, short money looks cheap, and it is tempting to fund long assets short. That saves coupon today and buys refinancing risk for later. The question is never which tenor is cheapest. It is which tenor your asset book can live with if the window shuts.",
+ v:"Your own asset liability management statements and the board-approved borrowing plan."},
+{h:"Paying fixed is the borrower's hedge",
+ p:"A borrower holding floating liabilities who expects rates to rise pays fixed in a swap. The floating leg received offsets the rising cost of the underlying, leaving a known fixed cost. You give up the gain if rates fall instead. Settle the accounting treatment and hedge designation before dealing, because neither can be applied backwards.",
+ v:"FBIL benchmark methodology; CCIL derivatives segment reporting; the applicable hedge accounting standard."},
+{h:"Negative carry is sometimes the right answer",
+ p:"Pre-funding costs you the gap between what you pay on the money and what you earn parking it. That cost is real and visible on a page. The cost of not pre-funding is invisible until the window shuts. Put both sides in writing whenever you recommend either.",
+ v:"Your own treasury investment returns against the marginal cost of the borrowing under consideration."}
+];
+(function(){
+  var w=document.getElementById("mechList");
+  MECH.forEach(function(m){
+    var d=document.createElement("div"); d.className="mech";
+    d.innerHTML='<h5>'+m.h+'</h5><p>'+m.p+'</p><span class="verify"><b>Verify against: </b>'+m.v+'</span>';
+    w.appendChild(d);
+  });
+})();
+
+/* ---------- ADVANCED: sources, cadence, drill ---------- */
+var SOURCES=[
+{n:"CCIL — ccilindia.com",tier:"p",w:"Market Watch and Trading Summary for traded G-sec levels; Reported Deals; Rakshitra monthly; Weekly Market Update; the research archive.",c:"Daily, plus the monthly read"},
+{n:"RBI — rbi.org.in",tier:"p",w:"Auction notifications and results, OMO announcements, the half-yearly borrowing calendar, MPC resolution and minutes, Weekly Statistical Supplement, Master Directions.",c:"Daily"},
+{n:"FBIL — fbil.org.in",tier:"p",w:"Overnight and term MIBOR, the published G-sec and SDL valuation curve, the swap benchmark.",c:"Daily"},
+{n:"FIMMDA — fimmda.org",tier:"p",w:"The corporate bond spread matrix and the methodology behind it; market practice circulars.",c:"Fortnightly, at each polling"},
+{n:"MoSPI and PIB",tier:"p",w:"The CPI press release with the division-wise break-up, not somebody's summary of it.",c:"12th of each month"},
+{n:"SEBI — sebi.gov.in",tier:"p",w:"NCS Regulations and the master circular governing how you may issue and list.",c:"On change"},
+{n:"NSE and BSE bidding platforms",tier:"p",w:"Issuance calendars, bid results and cut-offs for comparable PSU paper.",c:"Weekly"},
+{n:"Reuters bond market wrap",tier:"m",w:"Dealer trading ranges, swap levels, and the reason behind the day's move.",c:"Daily"},
+{n:"Business Standard, Mint",tier:"m",w:"Policy context and coverage of primary issuance. Useful for narrative, never for a number.",c:"Daily"},
+{n:"Trading Economics",tier:"m",w:"Quick cross-check of the Indian 10Y, the US 10Y and the CPI series, with a dated note on what moved each.",c:"As needed"}
+];
+(function(){
+  var tb=document.getElementById("srcBody");
+  SOURCES.forEach(function(s){
+    var tr=document.createElement("tr");
+    tr.innerHTML='<td>'+s.n+'</td><td><span class="tier '+s.tier+'">'+(s.tier==="p"?"Primary":"Market")+'</span></td><td>'+s.w+'</td><td class="mono">'+s.c+'</td>';
+    tb.appendChild(tr);
+  });
+  var CAD=[
+  {h:"Every morning, fifteen minutes",p:"CCIL Market Watch for the traded 10-year and the overnight rate. RBI press releases for anything issued overnight. One bond market wrap for the reason behind the move. Then write your log line, before you read anyone's opinion."},
+  {h:"Every week",p:"The auction notification, then the result — cut-off, bid-to-cover, devolvement. The state auction, because state supply is what actually crowds your window. CCIL's Weekly Market Update. Bid results for comparable PSU paper on the bidding platforms."},
+  {h:"Every fortnight",p:"The FIMMDA matrix at each polling. Plot your own last issue against the matrix for that date and write the difference in one sentence."},
+  {h:"Every month",p:"The CPI release on the 12th, read from the MoSPI press release itself. Rakshitra, cover to cover. The RBI Weekly Statistical Supplement series for durable liquidity."},
+  {h:"Every policy cycle",p:"The MPC resolution on the day, then the minutes two weeks later. The minutes are where the disagreement is, and the disagreement is the forecast."},
+  {h:"Every half year",p:"The borrowing calendar for the coming half. Map your issuance plan against the heaviest central and state supply weeks, and move your windows off them before anyone asks you to."}];
+  var w=document.getElementById("cadenceList");
+  CAD.forEach(function(c){ var d=document.createElement("div"); d.className="mech"; d.innerHTML='<h5>'+c.h+'</h5><p>'+c.p+'</p>'; w.appendChild(d); });
+})();
+
+var DRILL=[
+{m:"M01",q:"The repo has not moved for three meetings, yet the 10-year has risen 40 bp. Give three separate explanations, and say how you would tell which one is operating.",
+ a:"Term premium widening on supply — check the auction calendar, cut-offs and bid-to-cover. Inflation expectations repricing — check the swap curve, which usually moves before the bond curve. Global spillover — check the US 10-year and the currency over the same window; spillover shows up as the whole emerging market complex moving together. Name the test, not just the cause."},
+{m:"M02",q:"Overnight money is trading close to the standing deposit facility rather than near the repo. What does that tell you, and what does it imply for your issuance window?",
+ a:"Surplus liquidity. Banks hold more cash than they can deploy and are parking at the floor. Short-dated paper will be well bid and commercial paper will price tight, so the near end of your funding is cheap. It says very little about the long end, which is driven by supply and term premium. Do not read a comfortable overnight rate as permission to assume a comfortable ten-year auction."},
+{m:"M03",q:"CPI prints at 5.8% against a 4% target and a 6% upper tolerance. Has the RBI breached its mandate?",
+ a:"No. The target is 4% within a band of plus or minus two percentage points, so 5.8% is inside the band. Failure under the framework means inflation outside the band for three consecutive quarters — a much higher bar. Anyone calling a single 5.8% print a breach has confused target with band, and that confusion should disqualify the source."},
+{m:"M04",q:"An auction devolves on primary dealers. Walk through what you do next as the borrowing desk.",
+ a:"Read it as a refusal of price, not a technical event. Check whether it was tenor-specific or across the curve. Check the state auction that week and the coming supply. Assume secondary levels reset wider and that any issue of yours in that tenor over the next fortnight prices off the new level. Then move the window, shorten the tenor, or size down — and put the reasoning in writing before the market proves you right or wrong."},
+{m:"M05",q:"The Fully Accessible Route is widened to include new long-dated securities. Which part of the curve moves, and why does it matter to you specifically?",
+ a:"The long end, because that is where the newly eligible paper sits and where foreign demand is least contested by domestic buyers. For a long-dated issuer it can compress the base curve under your longest paper. It also brings a holder whose behaviour differs from a domestic insurer — foreign flows reverse quickly on currency — so a better level arrives with more volatility inside it."},
+{m:"M06",q:"Your issue clears 12 bp wider than the matrix for that day. Give three explanations that do not involve your credit.",
+ a:"Timing against supply — a heavy central or state auction the same week. Tenor crowding — investors already hold enough of your paper at that point. Line liquidity — a fresh line rather than a reissue, so buyers priced in the difficulty of selling later. Structure is a fourth: a call or staggered redemption costs spread. Only after ruling these out do you look at credit."},
+{m:"M07",q:"Why does reissuing into an existing line usually price better than launching a fresh one, at the same tenor and the same rating?",
+ a:"Size. A larger outstanding line trades more, so an investor can exit before maturity at a smaller cost, and they pay for that in yield. Fresh lines fragment your stock into many small illiquid securities and quietly widen the liquidity component of your spread on every future issue. ISIN limits push the same way, which is not a coincidence."},
+{m:"M08",q:"The curve is steep. Your asset book is long-dated. Make the case for funding short, then demolish it.",
+ a:"The case: the near end is materially cheaper, the saving is immediate and measurable, and if the curve stays steep you refinance repeatedly at low cost. The demolition: you have swapped a known cost for an unknown one. Assets do not reprice when liabilities do, so a shift in the curve hits margin directly, and a shut window turns a pricing question into a liquidity question. The honest answer is a deliberate proportion, set in the board-approved plan and not chosen opportunistically at each issue."},
+{m:"M09",q:"You pay fixed at 6.60% against floating at 5.45%. Floating never moves for the whole tenor. What happened, and was the trade wrong?",
+ a:"You paid 115 bp a year for protection you did not need. That is a cost, not necessarily an error. A hedge is judged on the distribution of outcomes when it was done, not on the single path that occurred. The error would be doing it without stating the breakeven in advance, without hedge designation, or without a view you could defend in writing. Never let a hedge be judged by hindsight, and never defend one by hindsight either."},
+{m:"M10",q:"A director asks why your cost of funds is above a peer's. Structure the answer in thirty seconds.",
+ a:"Three components in order. Base curve: were we issuing on the same days into the same curve. Tenor and structure: are we comparing ten-year bullet against five-year, plain against callable. Credit and liquidity spread: what the matrix says, and how much of the gap is line size rather than rating. Then one sentence on which of the three we can act on this year. Never answer with a single number, and never with the coupon alone."},
+{m:"M06",q:"What is the difference between the coupon and the all-in cost, and which belongs in a note to management?",
+ a:"The coupon is what the investor receives. The all-in cost adds arranger fees, stamp duty, listing and depository charges, rating fees and any discount at issue, spread over the tenor and expressed as a yield. The all-in cost belongs in the note. Comparing coupons across two issues with different cost structures is not a comparison at all."},
+{m:"M02",q:"The RBI announces a large open market purchase. A colleague says the 10-year must fall. When is he wrong?",
+ a:"When the purchases sit in illiquid off-the-run securities rather than the benchmark, so the benchmark barely moves. When the operation is offsetting currency intervention that is draining liquidity, so it replaces rupees rather than adding them. And when supply expectations rise at the same time, so the market reads it as accommodating more issuance rather than cutting net supply. Always ask what is being bought, and against what."}
+];
+function renderDrill(){
+  var w=document.getElementById("drillList"); w.innerHTML="";
+  DRILL.forEach(function(d,i){
+    var saved=(STATE.drill[i]||{}).text||"";
+    var el=document.createElement("div"); el.className="q";
+    el.innerHTML='<div class="qmeta">'+d.m+' · question '+(i+1)+'</div><div class="qtext">'+d.q+'</div>'+
+      '<textarea data-i="'+i+'" placeholder="Write your answer first.">'+saved+'</textarea>'+
+      '<div class="qbtns"><button data-reveal="d'+i+'">Reveal model answer</button></div>'+
+      '<div class="ans"><b>Model answer.</b> '+d.a+'</div>';
+    w.appendChild(el);
+  });
+}
+document.getElementById("drillList").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-reveal]"):null; if(!b) return;
+  var c=b.closest(".q"); c.classList.toggle("open");
+  b.textContent=c.classList.contains("open")?"Hide model answer":"Reveal model answer";
+});
+document.getElementById("drillList").addEventListener("input",function(e){
+  if(e.target.tagName!=="TEXTAREA") return;
+  STATE.drill[e.target.dataset.i]={text:e.target.value}; saveState();
+});
+document.getElementById("drillReset").addEventListener("click",function(){ STATE.drill={}; saveState(); renderDrill(); });
+
+/* ---------- LIVE FEED ---------- */
+var FEED={}, timer=null;
+function setDot(cls,msg){
+  var d=document.getElementById("feedDot"); d.className="dot "+cls;
+  document.getElementById("feedStatus").textContent=msg;
+}
+function fetchFeed(){
+  var url=(STATE.cfg.url||"").trim();
+  if(!url){ setDot("wait","Not connected"); return; }
+  setDot("wait","Refreshing…");
+  var bust = url + (url.indexOf("?")>-1?"&":"?") + "cb=" + Date.now();
+  fetch(bust,{cache:"no-store"}).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.text();
+  }).then(function(t){
+    var raw;
+    try{ raw=JSON.parse(t); }catch(e){ throw new Error("file is not valid JSON"); }
+    if(!raw || typeof raw!=="object" || Array.isArray(raw)) throw new Error("expected a flat object");
+    var got={};
+    Object.keys(raw).forEach(function(k){
+      got[String(k).trim().toUpperCase().replace(/[^A-Z0-9]/g,"")] = raw[k];
+    });
+    var keys=["REPO","SDF","MSF","GSEC10Y","AAA10Y","CPI","USDINR","BRENT","US10Y"];
+    var hits=keys.filter(function(k){ return got[k]!==undefined && got[k]!==null && got[k]!==""; });
+    if(!hits.length) throw new Error("no known keys in the file");
+    FEED=got;
+    setDot("ok","Live · "+(got.UPDATED||new Date().toLocaleTimeString())+" · "+hits.length+" values"+(got.SOURCE?" · "+got.SOURCE:""));
+    document.getElementById("cfg_msg").textContent="Connected to "+url+". Last read "+new Date().toLocaleString()+". Keys found: "+hits.join(", ")+".";
+    applyFeed();
+  }).catch(function(err){
+    setDot("err","Feed failed — "+err.message);
+    document.getElementById("cfg_msg").textContent="Could not read "+url+" ("+err.message+"). On GitHub Pages the file must sit at that path beside this page. Opening this page from a file:// address will block the fetch. Manual entry still works.";
+  });
+}
+function num(id){ return parseFloat(document.getElementById(id).value); }
+function fv(k){ var v=parseFloat(FEED[k]); return isNaN(v)?null:v; }
+function applyFeed(){
+  var map={REPO:"rRepo",SDF:"rSDF",MSF:"rMSF",GSEC10Y:"r10Y",AAA10Y:"rAAA"};
+  Object.keys(map).forEach(function(k){ var v=fv(k); if(v!==null) document.getElementById(map[k]).value=v; });
+  drawBoard();
+}
+function drawBoard(){
+  var sdf=num("rSDF"), repo=num("rRepo"), msf=num("rMSF"), ten=num("r10Y"), aaa=num("rAAA");
+  if([sdf,repo,msf,ten].some(isNaN)) return;
+  STATE.manual={sdf:sdf,repo:repo,msf:msf,ten:ten,aaa:aaa}; saveState();
+
+  var tiles=[
+    {v:ten.toFixed(2)+"%",l:"10Y G-sec",hero:true},
+    {v:(isNaN(aaa)?"—":Math.round((aaa-ten)*100)+" bp"),l:"PSU AAA spread",hero:true},
+    {v:repo.toFixed(2)+"%",l:"Repo"},
+    {v:Math.round((ten-repo)*100)+" bp",l:"10Y over repo"},
+    {v:(fv("CPI")!==null?fv("CPI").toFixed(2)+"%":"—"),l:"CPI"},
+    {v:(fv("US10Y")!==null?fv("US10Y").toFixed(2)+"%":"—"),l:"US 10Y"},
+    {v:(fv("BRENT")!==null?"$"+fv("BRENT").toFixed(1):"—"),l:"Brent"},
+    {v:(fv("USDINR")!==null?fv("USDINR").toFixed(2):"—"),l:"USDINR"}
+  ];
+  document.getElementById("tiles").innerHTML=tiles.map(function(t){
+    return '<div class="tile'+(t.hero?" hero":"")+'"><div class="tv">'+t.v+'</div><div class="tl">'+t.l+'</div></div>';
+  }).join("");
+
+  var lo=Math.min(sdf,repo,msf,ten)-0.6, hi=Math.max(sdf,repo,msf,ten)+0.6, span=hi-lo;
+  function pos(v){ return ((v-lo)/span)*100; }
+  var rail=document.getElementById("rail");
+  Array.prototype.slice.call(rail.querySelectorAll(".tick")).forEach(function(n){n.remove()});
+  [{v:sdf,l:"SDF floor",c:""},{v:repo,l:"Repo",c:"key"},{v:msf,l:"MSF ceiling",c:""},{v:ten,l:"10Y G-sec",c:"key ten"}]
+  .forEach(function(m){
+    var d=document.createElement("div"); d.className="tick "+m.c; d.style.left=pos(m.v)+"%";
+    d.innerHTML='<div class="stem"></div><div class="val">'+m.v.toFixed(2)+'</div><div class="lbl">'+m.l+'</div>';
+    rail.appendChild(d);
+  });
+  var c=document.getElementById("corridor");
+  c.style.left=pos(sdf)+"%"; c.style.width=(pos(msf)-pos(sdf))+"%";
+  document.getElementById("railFoot").textContent =
+    "Corridor width "+Math.round((msf-sdf)*100)+" bp · the 10Y sits "+Math.round((ten-repo)*100)+" bp above the repo"+
+    (isNaN(aaa)?"":" · your paper sits "+Math.round((aaa-ten)*100)+" bp above the 10Y");
+
+  var sb=document.getElementById("s_base"); if(sb && !sb.dataset.touched) sb.value=ten.toFixed(2);
+  var si=document.getElementById("s_issue"); if(si && !si.dataset.touched && !isNaN(aaa)) si.value=aaa.toFixed(2);
+  calcSpread();
+}
+["rSDF","rRepo","rMSF","r10Y","rAAA"].forEach(function(id){ document.getElementById(id).addEventListener("input",drawBoard); });
+
+function scheduleFeed(){
+  if(timer) clearInterval(timer);
+  var m=Math.max(1,Math.min(120, parseInt(STATE.cfg.mins,10)||10));
+  if(STATE.cfg.url){ fetchFeed(); timer=setInterval(fetchFeed, m*60000); }
+}
+document.getElementById("cfg_save").addEventListener("click",function(){
+  STATE.cfg={url:document.getElementById("cfg_url").value.trim()||"data/rates.json",
+             mins:parseInt(document.getElementById("cfg_mins").value,10)||10};
+  saveState(); scheduleFeed();
+});
+document.getElementById("cfg_now").addEventListener("click",fetchFeed);
+document.getElementById("cfg_clear").addEventListener("click",function(){
+  STATE.cfg={url:"",mins:10}; saveState();
+  document.getElementById("cfg_url").value=""; if(timer) clearInterval(timer);
+  FEED={}; setDot("wait","Not connected");
+  document.getElementById("cfg_msg").textContent="Disconnected. Manual entry is in use.";
+  drawBoard();
+});
+
+/* ---------- calculators ---------- */
+function fmtCr(x){ return "₹"+x.toFixed(2)+" cr"; }
+function calcSpread(){
+  var i=parseFloat(document.getElementById("s_issue").value), b=parseFloat(document.getElementById("s_base").value);
+  if(isNaN(i)||isNaN(b)) return;
+  document.getElementById("s_out").textContent=((i-b)>=0?"+":"")+Math.round((i-b)*100)+" bp over the base curve";
+  document.getElementById("s_cost").textContent=fmtCr(1000*0.0001*10);
+}
+["s_issue","s_base"].forEach(function(id){
+  document.getElementById(id).addEventListener("input",function(){ this.dataset.touched="1"; calcSpread(); });
+});
+function calcBond(){
+  var c=num("b_cpn"), y=num("b_ytm")/100, n=Math.round(num("b_n"));
+  if(isNaN(c)||isNaN(y)||isNaN(n)||n<1) return;
+  var price=0,w=0;
+  for(var t=1;t<=n;t++){ var cf=c+(t===n?100:0), pv=cf/Math.pow(1+y,t); price+=pv; w+=t*pv; }
+  var mac=w/price, mod=mac/(1+y);
+  document.getElementById("b_price").textContent="₹"+price.toFixed(3);
+  document.getElementById("b_mac").textContent=mac.toFixed(3)+" yr";
+  document.getElementById("b_mod").textContent=mod.toFixed(3)+" yr";
+  document.getElementById("b_pv01").textContent="₹"+(mod*price*0.0001).toFixed(4);
+  document.getElementById("b_pv01c").textContent=fmtCr(1000*mod*0.0001);
+}
+["b_cpn","b_ytm","b_n"].forEach(function(id){ document.getElementById(id).addEventListener("input",calcBond); });
+function calcAllIn(){
+  var c=num("a_cpn"), size=num("a_size"), cost=num("a_cost"), n=Math.round(num("a_n"));
+  if(isNaN(c)||isNaN(size)||isNaN(cost)||isNaN(n)||n<1||size<=0) return;
+  var net=size-cost, lo=0, hi=1, mid=0;
+  for(var k=0;k<200;k++){
+    mid=(lo+hi)/2; var pv=0;
+    for(var t=1;t<=n;t++) pv+=(size*c/100+(t===n?size:0))/Math.pow(1+mid,t);
+    if(pv>net) lo=mid; else hi=mid;
+  }
+  document.getElementById("a_out").textContent=(mid*100).toFixed(3)+"% all-in";
+  document.getElementById("a_up").textContent="+"+Math.round((mid*100-c)*100)+" bp";
+  document.getElementById("a_net").textContent=fmtCr(net);
+}
+["a_cpn","a_size","a_cost","a_n"].forEach(function(id){ document.getElementById(id).addEventListener("input",calcAllIn); });
+function calcSwap(){
+  var f=num("w_fix"), fl=num("w_flt"), nt=num("w_not"), n=Math.round(num("w_n"));
+  if(isNaN(f)||isNaN(fl)||isNaN(nt)||isNaN(n)) return;
+  document.getElementById("w_out").textContent=Math.round((f-fl)*100)+" bp of protection bought";
+  document.getElementById("w_carry").textContent=fmtCr(nt*(f-fl)/100);
+  document.getElementById("w_be").textContent=f.toFixed(2)+"% over "+n+" yr";
+}
+["w_fix","w_flt","w_not","w_n"].forEach(function(id){ document.getElementById(id).addEventListener("input",calcSwap); });
+
+/* ---------- market log ---------- */
+function renderLog(){
+  var tb=document.getElementById("logBody"); tb.innerHTML="";
+  var rows=STATE.log.slice().sort(function(a,b){return a.date<b.date?1:-1});
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="8" style="color:var(--muted)">No entries yet. Write today\'s line before you read anyone\'s opinion.</td></tr>'; return; }
+  rows.forEach(function(r){
+    var tr=document.createElement("tr");
+    tr.innerHTML='<td class="mono">'+r.date+'</td><td class="mono">'+(r.y10||"")+'</td><td class="mono">'+(r.spr||"")+
+      '</td><td class="mono">'+(r.ust||"")+'</td><td class="mono">'+(r.oil||"")+'</td><td class="mono">'+(r.fx||"")+
+      '</td><td>'+(r.note||"")+'</td><td><button class="btn ghost" data-del="'+r.date+'" style="padding:4px 8px">Delete</button></td>';
+    tb.appendChild(tr);
+  });
+}
+document.getElementById("logBody").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("[data-del]"):null; if(!b) return;
+  STATE.log=STATE.log.filter(function(r){return r.date!==b.dataset.del}); saveState(); renderLog();
+});
+document.getElementById("lg_fill").addEventListener("click",function(){
+  var ten=num("r10Y"), aaa=num("rAAA");
+  if(!isNaN(ten)) document.getElementById("lg_10y").value=ten.toFixed(2);
+  if(!isNaN(aaa)&&!isNaN(ten)) document.getElementById("lg_spr").value=Math.round((aaa-ten)*100);
+  if(fv("US10Y")!==null) document.getElementById("lg_ust").value=fv("US10Y");
+  if(fv("BRENT")!==null) document.getElementById("lg_oil").value=fv("BRENT");
+  if(fv("USDINR")!==null) document.getElementById("lg_fx").value=fv("USDINR");
+});
+document.getElementById("lg_save").addEventListener("click",function(){
+  var d=document.getElementById("lg_date").value;
+  if(!d){ document.getElementById("lg_date").focus(); return; }
+  var rec={date:d,y10:document.getElementById("lg_10y").value,spr:document.getElementById("lg_spr").value,
+    ust:document.getElementById("lg_ust").value,oil:document.getElementById("lg_oil").value,
+    fx:document.getElementById("lg_fx").value,note:document.getElementById("lg_note").value.replace(/[<>]/g,"")};
+  STATE.log=STATE.log.filter(function(r){return r.date!==d}); STATE.log.push(rec); saveState(); renderLog();
+  document.getElementById("lg_note").value="";
+});
+function download(name,text,type){
+  var b=new Blob([text],{type:type}), u=URL.createObjectURL(b);
+  var a=document.createElement("a"); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+document.getElementById("lg_csv").addEventListener("click",function(){
+  var head="date,gsec10y,psu_aaa_spread_bp,us10y,brent,usdinr,note\n";
+  var body=STATE.log.slice().sort(function(a,b){return a.date<b.date?-1:1}).map(function(r){
+    return [r.date,r.y10,r.spr,r.ust,r.oil,r.fx,'"'+(r.note||"").replace(/"/g,'""')+'"'].join(",");
+  }).join("\n");
+  download("rate-desk-log.csv",head+body,"text/csv");
+});
+document.getElementById("lg_json").addEventListener("click",function(){ download("rate-desk-state.json",JSON.stringify(STATE,null,2),"application/json"); });
+document.getElementById("lg_import").addEventListener("click",function(){
+  var inp=document.createElement("input"); inp.type="file"; inp.accept=".json,application/json";
+  inp.addEventListener("change",function(){
+    var f=inp.files[0]; if(!f) return;
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var s=JSON.parse(fr.result);
+        STATE.lessons=s.lessons||{}; STATE.mod=s.mod||{}; STATE.drill=s.drill||{};
+        STATE.log=s.log||[]; STATE.manual=s.manual||{}; STATE.cfg=s.cfg||STATE.cfg;
+        saveState(); hydrate(); 
+      }catch(e){ alert("That file could not be read as Rate Desk data."); }
+    };
+    fr.readAsText(f);
+  });
+  inp.click();
+});
+
+/* ---------- boot ---------- */
+function hydrate(){
+  if(STATE.manual && STATE.manual.repo){
+    document.getElementById("rSDF").value=STATE.manual.sdf;
+    document.getElementById("rRepo").value=STATE.manual.repo;
+    document.getElementById("rMSF").value=STATE.manual.msf;
+    document.getElementById("r10Y").value=STATE.manual.ten;
+    if(STATE.manual.aaa) document.getElementById("rAAA").value=STATE.manual.aaa;
+  }
+  document.getElementById("cfg_url").value=(STATE.cfg.url!==undefined?STATE.cfg.url:"data/rates.json");
+  document.getElementById("cfg_mins").value=STATE.cfg.mins||10;
+  renderLessons(); renderQuiz(); renderModules(); renderDrill(); renderLog();
+  drawBoard(); calcBond(); calcAllIn(); calcSwap(); calcSpread();
+  setLevel(STATE.level||"basic");
+  scheduleFeed();
+}
+storeGet("ratedesk2").then(function(raw){
+  if(raw){ try{
+    var s=JSON.parse(raw);
+    STATE.lessons=s.lessons||{}; STATE.mod=s.mod||{}; STATE.drill=s.drill||{}; STATE.quiz=s.quiz||{};
+    STATE.log=s.log||[]; STATE.manual=s.manual||{}; STATE.cfg=s.cfg||STATE.cfg;
+    STATE.level=s.level||"basic"; STATE.tab=s.tab||{};
+  }catch(e){} }
+  document.getElementById("lg_date").value=new Date().toISOString().slice(0,10);
+  hydrate();
+});
+window.addEventListener("resize",drawBoard);
+</script>
+</body>
+</html>
